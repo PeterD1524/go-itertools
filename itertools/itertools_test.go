@@ -48,6 +48,14 @@ func TestAllShortCircuit(t *testing.T) {
 	}
 }
 
+func TestOnce(t *testing.T) {
+	seq := Once(1)
+	collected := slices.Collect(seq)
+	if !slices.Equal(collected, []int{1}) {
+		t.Fatalf("Once(1) != [1], got %v", collected)
+	}
+}
+
 func TestSingle(t *testing.T) {
 	s := []int{1, 2, 3}
 	seq := slices.Values(s)
@@ -73,5 +81,24 @@ func TestSingle(t *testing.T) {
 		if !slices.Equal(again, []int{3}) {
 			t.Fatalf("Single([1, 2, 3]) not [3] after use with break, again = %v", again)
 		}
+	}
+}
+
+func TestDefer(t *testing.T) {
+	r := 0
+	d := 0
+	for range Defer(func() {
+		d++
+	}) {
+		if d != 0 {
+			t.Errorf("Defer(f) f called in for loop, d = %v", d)
+		}
+		r++
+	}
+	if r != 1 {
+		t.Errorf("Defer(f) loop body run not 1 time, r = %v", r)
+	}
+	if d != 1 {
+		t.Errorf("Defer(f) f not called after for loop, d = %v", d)
 	}
 }

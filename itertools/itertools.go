@@ -1,6 +1,8 @@
 package itertools
 
-import "iter"
+import (
+	"iter"
+)
 
 func All[V any](seq iter.Seq[V], f func(V) bool) bool {
 	for b := range Map(seq, f) {
@@ -18,6 +20,13 @@ func Map[V any, B any](seq iter.Seq[V], f func(V) B) iter.Seq[B] {
 				return
 			}
 		}
+	}
+}
+
+// Once returns an iterator that yields an element exactly once.
+func Once[V any](v V) iter.Seq[V] {
+	return func(yield func(V) bool) {
+		yield(v)
 	}
 }
 
@@ -53,4 +62,26 @@ func Single[V any](seq iter.Seq[V]) Iterator[V] {
 			}
 		}
 	}}
+}
+
+// Defer returns an iterator that will run f after yielding once.
+// Used for block level defer.
+// ```
+//
+//	func f(m *sync.Mutex) {
+//		m.Lock()
+//		for range Defer(func() {
+//			m.Unlock()
+//		}) {
+//			// do something while m locked
+//		}
+//		// m is unlocked here
+//	}
+//
+// ```
+func Defer(f func()) func(yield func() bool) {
+	return func(yield func() bool) {
+		defer f()
+		yield()
+	}
 }
