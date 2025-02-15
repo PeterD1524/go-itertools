@@ -47,3 +47,31 @@ func TestAllShortCircuit(t *testing.T) {
 		t.Fatalf("f(x) = x != 2, All([1, 2, 3], f) called f %v times, not 2", count)
 	}
 }
+
+func TestSingle(t *testing.T) {
+	s := []int{1, 2, 3}
+	seq := slices.Values(s)
+	{
+		it := Single(seq)
+		defer it.Stop()
+		for range it.Seq() {
+		}
+		again := slices.Collect(it.Seq())
+		if len(again) != 0 {
+			t.Fatalf("Single([1, 2, 3]) not empty after use, again = %v", again)
+		}
+	}
+	{
+		it := Single(seq)
+		defer it.Stop()
+		for v := range it.Seq() {
+			if v == 2 {
+				break
+			}
+		}
+		again := slices.Collect(it.Seq())
+		if !slices.Equal(again, []int{3}) {
+			t.Fatalf("Single([1, 2, 3]) not [3] after use with break, again = %v", again)
+		}
+	}
+}
