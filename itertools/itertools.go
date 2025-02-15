@@ -40,7 +40,7 @@ func (it *Iterator[V]) Seq() iter.Seq[V] {
 }
 
 // Single converts a possible multi-use iterator into a single-use resumable iterator.
-// Must `defer it.Stop()` or fully consume the iterator, otherwise you have a goroutine leak.
+// Must `defer it.Stop()` or fully consume the iterator, otherwise you have a goroutine (coroutine created by iter.Pull) leak.
 // See https://pkg.go.dev/iter#hdr-Single_Use_Iterators.
 // Goroutine leak detector: https://github.com/uber-go/goleak
 func Single[V any](seq iter.Seq[V]) Iterator[V] {
